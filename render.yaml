@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: ucp-parcial3-videojuegos
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_DIALECT
+        value: sqlite
+      - key: SQLITE_PATH
+        value: ./data/videojuegos.sqlite

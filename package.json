@@ -1,0 +1,35 @@
+{
+  "name": "ucp-parcial-3-api-videojuegos",
+  "version": "1.0.0",
+  "description": "API REST en Node.js y TypeScript para el Tercer Parcial de Metodología de la Programación IV - Universidad Católica de Pereira",
+  "author": "Juan David Arboleda Vallecilla & Diego Diaz",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && tsc",
+    "start": "node dist/server.js",
+    "start:ts": "tsx src/server.ts",
+    "test:postman": "newman run postman/Parcial3_Videojuegos_API.postman_collection.json -e postman/Parcial3_Environment.postman_environment.json"
+  },
+  "dependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.13.10",
+    "@types/swagger-ui-express": "^4.1.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.12.0",
+    "swagger-ui-express": "^5.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "zod": "^3.24.2"
+  },
+  "engines": {
+    "node": "22.x"
+  }
+}
