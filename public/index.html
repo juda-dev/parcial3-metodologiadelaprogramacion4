@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gaming Hub - API REST | UCP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <aside class="top-bar">
+    <div class="top-bar-content">
+      <div class="badge-ucp">
+        <i class="fa-solid fa-graduation-cap"></i>
+        <span>Universidad Católica de Pereira</span>
+      </div>
+      <div class="top-credits">
+        <strong>Metodología de la Programación IV</strong> • Parcial 3 • Docente: <em>Carlos Andrés Cortés</em>
+      </div>
+      <div class="server-status" id="serverStatusBadge">
+        <span class="status-dot"></span>
+        <span id="engineText">Conectando...</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Navigation Header -->
+  <header class="main-header">
+    <div class="container header-container">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <i class="fa-solid fa-gamepad"></i>
+        </div>
+        <div>
+          <h1 class="app-title">Gaming Hub REST API</h1>
+          <p class="app-subtitle">
+            Desarrollado por: <span class="authors-highlight">Juan David Arboleda Vallecilla</span> & <span class="authors-highlight">Diego Diaz</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="/api/docs" target="_blank" class="btn btn-outline" title="Ver documentación OpenAPI">
+          <i class="fa-solid fa-book-bookmark"></i>
+          <span>Swagger Docs</span>
+        </a>
+        <a href="/postman/Parcial3_Videojuegos_API.postman_collection.json" download="Parcial3_Videojuegos_API.postman_collection.json" class="btn btn-outline" title="Descargar colección para importar en Postman">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>Postman</span>
+        </a>
+        <button id="btnResetSeed" class="btn btn-secondary" title="Restaurar base de datos a sus valores iniciales">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Reset Semillas</span>
+        </button>
+        <button id="btnOpenCreateModal" class="btn btn-primary">
+          <i class="fa-solid fa-plus"></i>
+          <span>Nuevo Videojuego</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container main-content">
+    
+    <!-- KPI Stats Cards -->
+    <section class="kpi-grid" id="kpiContainer">
+      <div class="kpi-card">
+        <div class="kpi-icon icon-blue">
+          <i class="fa-solid fa-layer-group"></i>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Total Videojuegos</span>
+          <h3 class="kpi-value" id="kpiTotal">-</h3>
+          <span class="kpi-hint" id="kpiInStock">- en inventario</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon icon-yellow">
+          <i class="fa-solid fa-star"></i>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Calificación Promedio</span>
+          <h3 class="kpi-value" id="kpiRating">-</h3>
+          <span class="kpi-hint">Escala de 0.0 a 10.0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon icon-green">
+          <i class="fa-solid fa-tag"></i>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Precio Promedio</span>
+          <h3 class="kpi-value" id="kpiPrice">-</h3>
+          <span class="kpi-hint" id="kpiPriceRange">Rango min - max</span>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-icon icon-purple">
+          <i class="fa-solid fa-shapes"></i>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Géneros Disponibles</span>
+          <h3 class="kpi-value" id="kpiGenres">-</h3>
+          <span class="kpi-hint">Variedad en catálogo</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters & Search Toolbar -->
+    <section class="toolbar-card">
+      <div class="toolbar-search">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="searchInput" placeholder="Buscar por título, desarrollador o descripción..." />
+        <button id="btnClearSearch" class="btn-clear" title="Limpiar búsqueda" style="display: none;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="toolbar-filters">
+        <div class="filter-group">
+          <label for="filterGenre"><i class="fa-solid fa-filter"></i> Género:</label>
+          <select id="filterGenre">
+            <option value="">Todos los géneros</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterSort"><i class="fa-solid fa-arrow-down-wide-short"></i> Ordenar por:</label>
+          <select id="filterSort">
+            <option value="id">ID (Recientes primero)</option>
+            <option value="calificacion">Calificación</option>
+            <option value="precio">Precio</option>
+            <option value="titulo">Título</option>
+            <option value="anioLanzamiento">Año de lanzamiento</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterOrder"><i class="fa-solid fa-sort"></i> Sentido:</label>
+          <select id="filterOrder">
+            <option value="desc">Descendente</option>
+            <option value="asc">Ascendente</option>
+          </select>
+        </div>
+
+        <div class="view-toggles">
+          <button id="btnGridView" class="btn-view active" title="Vista en Cuadrícula">
+            <i class="fa-solid fa-grip"></i>
+          </button>
+          <button id="btnTableView" class="btn-view" title="Vista en Tabla Detallada">
+            <i class="fa-solid fa-table-list"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Games Container (Grid and Table Views) -->
+    <section id="gamesContainer" class="games-grid">
+      <!-- Los videojuegos se renderizan dinámicamente aquí -->
+    </section>
+
+    <div id="tableContainer" class="table-responsive" style="display: none;">
+      <table class="games-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Portada</th>
+            <th>Título</th>
+            <th>Desarrollador</th>
+            <th>Género</th>
+            <th>Plataforma</th>
+            <th>Año</th>
+            <th>Nota</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Acciones REST</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <!-- Filas dinámicas -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <i class="fa-solid fa-ghost empty-icon"></i>
+      <h3>No se encontraron videojuegos</h3>
+      <p>Intenta ajustar tus filtros de búsqueda o registra un nuevo juego en el catálogo.</p>
+      <button class="btn btn-primary" onclick="resetFilters()">
+        <i class="fa-solid fa-arrows-rotate"></i> Restablecer Filtros
+      </button>
+    </div>
+
+  </main>
+
+  <!-- Live REST Activity Console / Log Bar -->
+  <aside class="rest-console" id="restConsole">
+    <div class="rest-console-header" id="toggleConsole">
+      <div class="console-title">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Monitor de Peticiones REST en Vivo</span>
+        <span class="pulse-indicator"></span>
+      </div>
+      <div class="console-controls">
+        <span class="last-method-badge" id="lastMethodBadge">IDLE</span>
+        <span class="last-endpoint" id="lastEndpoint">Esperando peticiones...</span>
+        <button id="btnClearLogs" class="btn-icon" title="Limpiar logs">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+        <button id="btnExpandConsole" class="btn-icon" title="Expandir/Minimizar">
+          <i class="fa-solid fa-chevron-up"></i>
+        </button>
+      </div>
+    </div>
+    <div class="rest-console-body" id="consoleLogs">
+      <div class="log-entry log-welcome">
+        <span class="log-time">[SISTEMA]</span>
+        <span class="log-msg">Consola lista. Cada acción en la interfaz emitirá una petición REST real (GET, POST, PUT, PATCH, DELETE) que se inspeccionará aquí.</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Modal: Crear / Editar (POST & PUT) -->
+  <div class="modal-backdrop" id="gameModal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <div class="method-chip" id="modalMethodChip">POST</div>
+          <h2 id="modalTitle">Nuevo Videojuego</h2>
+        </div>
+        <button class="modal-close" id="btnCloseGameModal">&times;</button>
+      </div>
+
+      <form id="gameForm" class="modal-form">
+        <input type="hidden" id="gameId" />
+
+        <div class="form-row">
+          <div class="form-group col-8">
+            <label for="inputTitulo">Título del Videojuego <span class="required">*</span></label>
+            <input type="text" id="inputTitulo" required placeholder="Ej: Cyberpunk 2077" />
+          </div>
+          <div class="form-group col-4">
+            <label for="inputAnio">Año Lanzamiento <span class="required">*</span></label>
+            <input type="number" id="inputAnio" required min="1970" max="2035" placeholder="2023" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="inputDesarrollador">Desarrollador / Estudio <span class="required">*</span></label>
+            <input type="text" id="inputDesarrollador" required placeholder="Ej: CD Projekt Red" />
+          </div>
+          <div class="form-group col-6">
+            <label for="inputGenero">Género <span class="required">*</span></label>
+            <input type="text" id="inputGenero" required placeholder="Ej: RPG de Acción" />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col-6">
+            <label for="inputPlataforma">Plataforma(s) <span class="required">*</span></label>
+            <input type="text" id="inputPlataforma" required placeholder="Ej: PC / PS5 / Xbox Series X" />
+          </div>
+          <div class="form-group col-3">
+            <label for="inputCalificacion">Calificación (0 - 10) <span class="required">*</span></label>
+            <input type="number" id="inputCalificacion" required min="0" max="10" step="0.1" placeholder="9.5" />
+          </div>
+          <div class="form-group col-3">
+            <label for="inputPrecio">Precio ($ USD) <span class="required">*</span></label>
+            <input type="number" id="inputPrecio" required min="0" step="0.01" placeholder="59.99" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputImagenUrl">URL de la Carátula (Imagen) <span class="required">*</span></label>
+          <div class="image-input-wrapper">
+            <input type="url" id="inputImagenUrl" required placeholder="https://images.unsplash.com/..." />
+            <button type="button" class="btn btn-secondary btn-sm" id="btnPreviewImage">Vista Previa</button>
+          </div>
+          <div class="image-preview-container" id="imagePreviewContainer" style="display: none;">
+            <img id="imagePreview" src="" alt="Vista previa de portada" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="inputDescripcion">Descripción / Sinopsis <span class="required">*</span></label>
+          <textarea id="inputDescripcion" rows="3" required placeholder="Breve sinopsis argumental y características principales..."></textarea>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label class="custom-checkbox">
+            <input type="checkbox" id="inputEnStock" checked />
+            <span class="checkmark"></span>
+            Disponible en inventario (enStock = true)
+          </label>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelGameModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSaveGame">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span id="btnSaveText">Guardar Videojuego</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edición Parcial (PATCH) -->
+  <div class="modal-backdrop" id="patchModal" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <div class="method-chip patch-chip">PATCH</div>
+          <h2>Modificación Parcial (PATCH)</h2>
+        </div>
+        <button class="modal-close" id="btnClosePatchModal">&times;</button>
+      </div>
+
+      <div class="patch-info-banner">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>El método <strong>PATCH</strong> permite modificar únicamente los campos que decidas habilitar sin sobrescribir los demás.</span>
+      </div>
+
+      <form id="patchForm" class="modal-form">
+        <input type="hidden" id="patchGameId" />
+        <p class="patch-game-title" id="patchGameTitle">Videojuego seleccionado</p>
+
+        <!-- Campo Precio PATCH -->
+        <div class="patch-field-card">
+          <div class="patch-field-header">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="patchCheckPrecio" />
+              <span class="checkmark"></span>
+              <strong>Modificar Precio</strong>
+            </label>
+            <span class="current-val" id="patchCurrentPrecio">Actual: $0.00</span>
+          </div>
+          <div class="patch-field-input" id="patchInputPrecioWrapper" style="display: none;">
+            <input type="number" id="patchInputPrecio" min="0" step="0.01" placeholder="Nuevo precio en USD" />
+          </div>
+        </div>
+
+        <!-- Campo Calificación PATCH -->
+        <div class="patch-field-card">
+          <div class="patch-field-header">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="patchCheckCalificacion" />
+              <span class="checkmark"></span>
+              <strong>Modificar Calificación</strong>
+            </label>
+            <span class="current-val" id="patchCurrentCalificacion">Actual: 0.0</span>
+          </div>
+          <div class="patch-field-input" id="patchInputCalificacionWrapper" style="display: none;">
+            <input type="number" id="patchInputCalificacion" min="0" max="10" step="0.1" placeholder="Nueva calificación (0 a 10)" />
+          </div>
+        </div>
+
+        <!-- Campo Disponibilidad PATCH -->
+        <div class="patch-field-card">
+          <div class="patch-field-header">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="patchCheckEnStock" />
+              <span class="checkmark"></span>
+              <strong>Modificar Estado de Stock</strong>
+            </label>
+            <span class="current-val" id="patchCurrentEnStock">Actual: Disponible</span>
+          </div>
+          <div class="patch-field-input" id="patchInputEnStockWrapper" style="display: none;">
+            <select id="patchInputEnStock">
+              <option value="true">En Stock / Disponible (true)</option>
+              <option value="false">Agotado / No Disponible (false)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Campo Plataforma PATCH -->
+        <div class="patch-field-card">
+          <div class="patch-field-header">
+            <label class="custom-checkbox">
+              <input type="checkbox" id="patchCheckPlataforma" />
+              <span class="checkmark"></span>
+              <strong>Modificar Plataforma</strong>
+            </label>
+            <span class="current-val" id="patchCurrentPlataforma">Actual: -</span>
+          </div>
+          <div class="patch-field-input" id="patchInputPlataformaWrapper" style="display: none;">
+            <input type="text" id="patchInputPlataforma" placeholder="Nueva plataforma..." />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelPatchModal">Cancelar</button>
+          <button type="submit" class="btn btn-primary" id="btnSubmitPatch">
+            <i class="fa-solid fa-code-commit"></i>
+            <span>Aplicar Cambios Parciales (PATCH)</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Ver Detalle Completo (GET :id) -->
+  <div class="modal-backdrop" id="detailModal" style="display: none;">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <div class="method-chip get-chip">GET :id</div>
+          <h2>Detalle del Videojuego</h2>
+        </div>
+        <button class="modal-close" id="btnCloseDetailModal">&times;</button>
+      </div>
+
+      <div class="detail-body" id="detailContent">
+        <!-- Detalle dinámico -->
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCloseDetailBtn">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirmar Eliminación (DELETE) -->
+  <div class="modal-backdrop" id="deleteModal" style="display: none;">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header">
+        <div class="modal-title-area">
+          <div class="method-chip delete-chip">DELETE</div>
+          <h2>Confirmar Eliminación</h2>
+        </div>
+        <button class="modal-close" id="btnCloseDeleteModal">&times;</button>
+      </div>
+
+      <div class="delete-body">
+        <div class="delete-icon-wrapper">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <p>¿Estás seguro de que deseas eliminar permanentemente el videojuego <strong id="deleteGameTitle">-</strong> (ID: <span id="deleteGameId">-</span>)?</p>
+        <p class="delete-subtext">Esta acción enviará una petición <code>DELETE /api/videojuegos/:id</code> y removerá el registro de la base de datos.</p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btnCancelDelete">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="btnConfirmDelete">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Eliminar Definitivamente</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="container footer-content">
+      <div class="footer-left">
+        <p><strong>Universidad Católica de Pereira</strong> • Facultad de Ciencias Básicas e Ingeniería</p>
+        <p>Metodología de la Programación IV — Parcial 3 • Docente: Carlos Andrés Cortés</p>
+      </div>
+      <div class="footer-right">
+        <p>Desarrollado con <i class="fa-solid fa-heart text-danger"></i> por:</p>
+        <p class="footer-authors"><strong>Juan David Arboleda Vallecilla</strong> & <strong>Diego Diaz</strong></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>

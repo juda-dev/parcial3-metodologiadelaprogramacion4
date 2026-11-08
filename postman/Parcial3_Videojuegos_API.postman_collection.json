@@ -1,0 +1,531 @@
+{
+  "info": {
+    "_postman_id": "c71a3964-b52e-4b21-8ecb-99f7d2e5a1b3",
+    "name": "API REST Videojuegos - UCP",
+    "description": "Colección de pruebas para la API REST de Videojuegos. Metodología de la Programación IV - Universidad Católica de Pereira. Integrantes: Juan David Arboleda Vallecilla y Diego Diaz.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Sistema y Diagnóstico",
+      "item": [
+        {
+          "name": "GET Healthcheck & Autores",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Estado de respuesta es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"La respuesta contiene el estado 'online' y los autores correctos\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.status).to.eql(\"online\");",
+                  "    pm.expect(jsonData.autores).to.include(\"Juan David Arboleda Vallecilla\");",
+                  "    pm.expect(jsonData.autores).to.include(\"Diego Diaz\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            },
+            "description": "Verifica que el servidor esté activo, reporta el motor de base de datos en uso y los créditos de los autores."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Consultas (GET)",
+      "item": [
+        {
+          "name": "GET Listar Todos los Videojuegos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Retorna una lista de videojuegos válida\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.data.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos"]
+            },
+            "description": "Obtiene la lista completa de videojuegos ordenados por ID de manera descendente."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Filtrar por Género y Calificación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Los elementos devueltos cumplen los filtros\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    jsonData.data.forEach(function(item) {",
+                  "        pm.expect(item.calificacion).to.be.at.least(9.0);",
+                  "    });",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos?genero=RPG&minCalificacion=9.0&sortBy=calificacion&order=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos"],
+              "query": [
+                { "key": "genero", "value": "RPG" },
+                { "key": "minCalificacion", "value": "9.0" },
+                { "key": "sortBy", "value": "calificacion" },
+                { "key": "order", "value": "desc" }
+              ]
+            },
+            "description": "Permite filtrar por género, calificación mínima y ordenar resultados."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Estadísticas del Catálogo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Contiene métricas calculadas\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.data.total).to.be.a(\"number\");",
+                  "    pm.expect(jsonData.data.promedioCalificacion).to.be.a(\"number\");",
+                  "    pm.expect(jsonData.data.conteoPorGenero).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "stats"]
+            },
+            "description": "Calcula el total, promedio de calificaciones, conteo por género y juego más destacado."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Consultar Videojuego por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Retorna los datos del juego solicitado\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data.id).to.eql(parseInt(pm.environment.get(\"createdGameId\") || \"1\"));",
+                  "    pm.expect(jsonData.data).to.have.property(\"titulo\");",
+                  "    pm.expect(jsonData.data).to.have.property(\"desarrollador\");",
+                  "    pm.expect(jsonData.data).to.have.property(\"genero\");",
+                  "    pm.expect(jsonData.data).to.have.property(\"plataforma\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/{{createdGameId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "{{createdGameId}}"]
+            },
+            "description": "Consulta un juego específico mediante su ID numérico."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Error 404 - Videojuego No Existente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Responde con mensaje de error claro\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "    pm.expect(jsonData.error).to.include(\"No se encontró\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/999999",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "999999"]
+            },
+            "description": "Prueba de caso límite donde el recurso solicitado no existe."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Creación (POST)",
+      "item": [
+        {
+          "name": "POST Crear Nuevo Videojuego (Exitoso 201)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "var jsonData = pm.response.json();",
+                  "pm.test(\"El registro creado contiene un ID asignado\", function () {",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data.id).to.be.a(\"number\");",
+                  "    pm.expect(jsonData.data.titulo).to.eql(\"Final Fantasy VII Rebirth\");",
+                  "});",
+                  "",
+                  "// Guardamos el ID en el entorno para usarlo en PUT, PATCH y DELETE",
+                  "pm.environment.set(\"createdGameId\", jsonData.data.id);",
+                  "console.log(\"Nuevo videojuego creado con ID: \" + jsonData.data.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Final Fantasy VII Rebirth\",\n  \"desarrollador\": \"Square Enix\",\n  \"genero\": \"JRPG / Acción\",\n  \"plataforma\": \"PlayStation 5\",\n  \"anioLanzamiento\": 2024,\n  \"calificacion\": 9.3,\n  \"precio\": 69.99,\n  \"descripcion\": \"La continuación del inolvidable viaje de Cloud Strife y sus amigos mientras exploran las vastas regiones más allá de Midgar.\",\n  \"imagenUrl\": \"https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80\",\n  \"enStock\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos"]
+            },
+            "description": "Registra un nuevo videojuego en la base de datos con los 12 campos estructurados."
+          },
+          "response": []
+        },
+        {
+          "name": "POST Error 400 - Validación de Datos Faltantes",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Devuelve detalles específicos de validación\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.false;",
+                  "    pm.expect(jsonData.detalles).to.be.an(\"array\");",
+                  "    pm.expect(jsonData.detalles.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Juego Incompleto\",\n  \"calificacion\": 15.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos"]
+            },
+            "description": "Prueba negativa que verifica que Zod capture campos faltantes y valores fuera de rango."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Reemplazo Completo (PUT)",
+      "item": [
+        {
+          "name": "PUT Reemplazar Videojuego Existente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Todos los campos fueron actualizados\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data.titulo).to.eql(\"Final Fantasy VII Rebirth (Deluxe Edition)\");",
+                  "    pm.expect(jsonData.data.precio).to.eql(89.99);",
+                  "    pm.expect(jsonData.data.calificacion).to.eql(9.5);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Final Fantasy VII Rebirth (Deluxe Edition)\",\n  \"desarrollador\": \"Square Enix Creative Studio I\",\n  \"genero\": \"JRPG Épico\",\n  \"plataforma\": \"PlayStation 5 / PC\",\n  \"anioLanzamiento\": 2024,\n  \"calificacion\": 9.5,\n  \"precio\": 89.99,\n  \"descripcion\": \"Edición de lujo que incluye banda sonora digital, libro de arte digital y contenido adicional para el combate.\",\n  \"imagenUrl\": \"https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80\",\n  \"enStock\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/{{createdGameId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "{{createdGameId}}"]
+            },
+            "description": "Reemplazo integral del recurso existente mediante PUT."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. Actualización Parcial (PATCH)",
+      "item": [
+        {
+          "name": "PATCH Actualizar Solo Precio y Calificación",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Solo los campos enviados cambiaron y el resto se conservó\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.data.precio).to.eql(49.99);",
+                  "    pm.expect(jsonData.data.calificacion).to.eql(9.8);",
+                  "    pm.expect(jsonData.data.enStock).to.eql(false);",
+                  "    pm.expect(jsonData.camposModificados).to.include(\"precio\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"precio\": 49.99,\n  \"calificacion\": 9.8,\n  \"enStock\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/{{createdGameId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "{{createdGameId}}"]
+            },
+            "description": "Modifica únicamente los campos seleccionados sin requerir el envío del objeto completo."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Eliminación (DELETE)",
+      "item": [
+        {
+          "name": "DELETE Eliminar Videojuego Creado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Confirma la eliminación del recurso\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.mensaje).to.include(\"eliminado correctamente\");",
+                  "    pm.expect(jsonData.dataEliminada.id).to.eql(parseInt(pm.environment.get(\"createdGameId\")));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/{{createdGameId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "{{createdGameId}}"]
+            },
+            "description": "Elimina permanentemente el videojuego identificado por su ID."
+          },
+          "response": []
+        },
+        {
+          "name": "GET Verificar que fue Eliminado (Debe dar 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/{{createdGameId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "{{createdGameId}}"]
+            },
+            "description": "Comprueba que el elemento eliminado ya no existe en el catálogo."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Utilidades",
+      "item": [
+        {
+          "name": "POST Restaurar Datos Semilla (Reset)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code es 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Restauró la base de datos a su estado original\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.be.true;",
+                  "    pm.expect(jsonData.totalRegistros).to.be.at.least(8);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/videojuegos/reset-seed",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "videojuegos", "reset-seed"]
+            },
+            "description": "Restaura la tabla de videojuegos con los datos iniciales de prueba en cualquier momento."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
